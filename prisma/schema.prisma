@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  employees Employee[]
+  projects  Project[]
+}
+
+model Employee {
+  id           String    @id @default(cuid())
+  name         String
+  hourlyRate   Float     @default(0)
+  overtimeRate Float     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  employer     User      @relation(fields: [employerId], references: [id])
+  employerId   String
+
+  timeLogs     TimeLog[]
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+
+  timeLogs    TimeLog[]
+}
+
+model TimeLog {
+  id            String   @id @default(cuid())
+  date          DateTime @db.Date
+  hours         Float
+  overtimeHours Float    @default(0)
+  totalCost     Float    @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  employee      Employee @relation(fields: [employeeId], references: [id])
+  employeeId    String
+
+  project       Project  @relation(fields: [projectId], references: [id])
+  projectId     String
+}
