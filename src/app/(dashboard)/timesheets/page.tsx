@@ -52,6 +52,7 @@ export default function TimesheetsPage() {
     startDate: "",
     endDate: "",
   });
+  const [showForm, setShowForm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<TimeLog | null>(null);
   const [editForm, setEditForm] = useState(blankEntry);
@@ -225,157 +226,175 @@ export default function TimesheetsPage() {
       </div>
 
       {/* ── Add Entry Form ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">Add Time Entry</h2>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowForm((v) => !v)}
+          className="w-full flex items-center justify-between px-5 py-4 text-left"
+        >
+          <h2 className="font-semibold text-gray-900">Add Time Entry</h2>
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform ${showForm ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-        {submitError && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-            {submitError}
+        {showForm && (
+          <div className="px-5 pb-5">
+            {submitError && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {submitError}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                <div className="xl:col-span-1">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Employee
+                  </label>
+                  <select
+                    name="employeeId"
+                    value={form.employeeId}
+                    onChange={handleFormChange}
+                    required
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                  >
+                    <option value="">Select…</option>
+                    {employees.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="xl:col-span-1">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Project
+                  </label>
+                  <select
+                    name="projectId"
+                    value={form.projectId}
+                    onChange={handleFormChange}
+                    required
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                  >
+                    <option value="">Select…</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleFormChange}
+                    required
+                    max={new Date().toISOString().split("T")[0]}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Hours
+                  </label>
+                  <input
+                    type="number"
+                    name="hours"
+                    value={form.hours}
+                    onChange={handleFormChange}
+                    required
+                    min="0.5"
+                    max="24"
+                    step="0.5"
+                    placeholder="8"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    OT Hours
+                  </label>
+                  <input
+                    type="number"
+                    name="overtimeHours"
+                    value={form.overtimeHours}
+                    onChange={handleFormChange}
+                    min="0"
+                    max="24"
+                    step="0.5"
+                    placeholder="0"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {costPreview > 0
+                      ? `Cost: ${formatCurrency(costPreview)}`
+                      : "Notes"}
+                  </label>
+                  <input
+                    type="text"
+                    name="notes"
+                    value={form.notes}
+                    onChange={handleFormChange}
+                    placeholder="Optional notes…"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center gap-3 flex-wrap">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  {submitting ? "Saving…" : "Confirm Entry"}
+                </button>
+                {employees.length === 0 && (
+                  <span className="text-sm text-amber-600">
+                    Add employees first before logging time.
+                  </span>
+                )}
+                {employees.length > 0 && projects.length === 0 && (
+                  <span className="text-sm text-amber-600">
+                    Create a project before logging time.
+                  </span>
+                )}
+              </div>
+            </form>
           </div>
         )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-            <div className="xl:col-span-1">
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Employee
-              </label>
-              <select
-                name="employeeId"
-                value={form.employeeId}
-                onChange={handleFormChange}
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-              >
-                <option value="">Select…</option>
-                {employees.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="xl:col-span-1">
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Project
-              </label>
-              <select
-                name="projectId"
-                value={form.projectId}
-                onChange={handleFormChange}
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-              >
-                <option value="">Select…</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleFormChange}
-                required
-                max={new Date().toISOString().split("T")[0]}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Hours
-              </label>
-              <input
-                type="number"
-                name="hours"
-                value={form.hours}
-                onChange={handleFormChange}
-                required
-                min="0.5"
-                max="24"
-                step="0.5"
-                placeholder="8"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                OT Hours
-              </label>
-              <input
-                type="number"
-                name="overtimeHours"
-                value={form.overtimeHours}
-                onChange={handleFormChange}
-                min="0"
-                max="24"
-                step="0.5"
-                placeholder="0"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                {costPreview > 0
-                  ? `Cost: ${formatCurrency(costPreview)}`
-                  : "Notes"}
-              </label>
-              <input
-                type="text"
-                name="notes"
-                value={form.notes}
-                onChange={handleFormChange}
-                placeholder="Optional notes…"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3 flex-wrap">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              {submitting ? "Saving…" : "Confirm Entry"}
-            </button>
-            {employees.length === 0 && (
-              <span className="text-sm text-amber-600">
-                Add employees first before logging time.
-              </span>
-            )}
-            {employees.length > 0 && projects.length === 0 && (
-              <span className="text-sm text-amber-600">
-                Create a project before logging time.
-              </span>
-            )}
-          </div>
-        </form>
       </div>
 
       {/* ── Filters ── */}
